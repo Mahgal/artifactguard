@@ -1,0 +1,15 @@
+name: artifactguard
+version: "0.1.0"
+description: "Pre-load security scan for serialized model artifacts (pickle, torch, joblib, numpy, safetensors): opcode-level analysis reports the globals an artifact would invoke — os.system, subprocess.Popen, builtins.eval — before any loader runs it, plus a pre_tool_call hook that blocks loads of dangerous artifacts."
+author: "Mahgal"
+license: MIT
+homepage: https://github.com/Mahgal/artifactguard
+tags: [security, ml, pickle, scanning, supply-chain]
+requires_hermes: ">=0.19"
+provides_tools:
+  - artifact_scan
+  - artifact_audit_plugin
+provides_hooks:
+  - pre_tool_call
+config_schema:
+  block_on: {type: str, choices: [dangerous, caution], default: dangerous, description: "Lowest scan verdict the load guard blocks on. 'dangerous' blocks only artifacts with code-execution findings; 'caution' also blocks unreviewed or malformed ones."}
