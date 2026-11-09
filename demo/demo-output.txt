@@ -1,0 +1,77 @@
+### Preparing a folder of 'downloaded' artifacts (2 are hostile)...
+  wrote model-good.pt (321 bytes)
+  wrote weights.pkl (83 bytes)
+  wrote model.safetensors (73 bytes)
+  wrote model-trojan.pt (280 bytes)
+  wrote features.npy (196 bytes)
+Demo workspace ready: /home/hatch/workspace/hermes-artifactguard/demo-workspace
+ArtifactGuard blocked load of /home/hatch/workspace/hermes-artifactguard/demo-workspace/model-trojan.pt (os.system is actually invoked via REDUCE; os.system)
+
+========================================================================
+STEP 1 — Audit a folder of downloaded artifacts before touching them
+========================================================================
+$ artifact_audit_plugin(path='demo-workspace/')
+files scanned: 5   aggregate verdict: DANGEROUS
+  features.npy         dangerous    <-- invokes builtins.eval
+  model-good.pt        clean     
+  model-trojan.pt      dangerous    <-- invokes os.system
+  model.safetensors    clean     
+  weights.pkl          clean     
+
+========================================================================
+STEP 2 — Full report on the hostile checkpoint
+========================================================================
+$ artifact_scan(path='demo-workspace/model-trojan.pt')
+{
+  "path": "/home/hatch/workspace/hermes-artifactguard/demo-workspace/model-trojan.pt",
+  "format": "zip-container",
+  "verdict": "dangerous",
+  "globals": [],
+  "findings": [],
+  "notes": [
+    "member archive/data/0: raw data (4 bytes), not executable pickle"
+  ],
+  "members": [
+    {
+      "path": "/home/hatch/workspace/hermes-artifactguard/demo-workspace/model-trojan.pt!archive/data.pkl",
+      "format": "pickle",
+      "verdict": "dangerous",
+      "globals": [
+        {
+          "module": "os",
+          "name": "system",
+          "severity": "critical",
+          "reason": "shell command execution"
+        }
+      ],
+      "findings": [
+        {
+          "severity": "critical",
+          "kind": "invocation",
+          "detail": "os.system is actually invoked via REDUCE"
+        }
+      ],
+      "notes": [],
+      "members": []
+    }
+  ]
+}
+
+========================================================================
+STEP 3 — The agent tries to load it anyway; the guard hook fires
+========================================================================
+$ execute_code:
+    import torch
+    model = torch.load('/home/hatch/workspace/hermes-artifactguard/demo-workspace/model-trojan.pt')
+-> pre_tool_call verdict:
+{
+  "action": "block",
+  "message": "ArtifactGuard blocked this call: /home/hatch/workspace/hermes-artifactguard/demo-workspace/model-trojan.pt scanned as DANGEROUS \u2014 os.system is actually invoked via REDUCE; os.system. The artifact was NOT loaded. Run artifact_scan for the full report, or move the file aside if this is unexpected."
+}
+
+========================================================================
+STEP 4 — And the clean checkpoint loads unimpeded
+========================================================================
+guard returns: None  (None = no objection, the load proceeds)
+
+ArtifactGuard: the artifact was evidence, never an execution.
