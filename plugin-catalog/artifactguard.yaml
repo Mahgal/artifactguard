@@ -4,7 +4,7 @@
 # (tool arguments, or paths named in a load call intercepted by its hook).
 name: artifactguard
 repo: https://github.com/Mahgal/artifactguard
-sha: "8a25357623683fb63c5b5dfbf4b87d0eb7452a5e"
+sha: "1dbed03645fc54dee833446e4c78566934f07d40"
 description: "Pre-load security scan for serialized model artifacts (pickle, torch, joblib, numpy, safetensors): disassembles pickle opcodes and reports the globals an artifact would invoke — os.system, subprocess.Popen, builtins.eval — before any loader runs it. Includes a pre_tool_call guard that blocks loads of dangerous artifacts, and a directory audit for plugin bundles."
 maintainer: Mahgal
 tier: community
