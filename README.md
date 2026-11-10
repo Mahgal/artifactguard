@@ -123,3 +123,4 @@ python -m unittest discover -s tests -v   # 24 tests, stdlib only
 ## License
 
 MIT — see `LICENSE`.
+Author: Borjigin Mahgal (legal name: Boerzhijin Mahagala)
